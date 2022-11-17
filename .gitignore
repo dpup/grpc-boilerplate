@@ -1,0 +1,12 @@
+# Generated files.
+go/bin
+go/pkg
+*.pb.go
+*.gw.go
+certs/server.*
+certs/rootCA.*
+
+# OS and IDE files.
+.DS_Store
+*.sublime-workspace
+*.orig
