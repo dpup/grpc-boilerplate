@@ -38,15 +38,17 @@ Hopefully that works. Please submit Pull Requests with corrections or updates.
 ## Code layout
 
 This boilerplate is intended to work best for a multi-language, mono-repo
-project. Go source files are rooted under `/go/src/boiler.plate`. I suggest you
-find-and-replace references to `boiler.plate` with `myawesomeapp.com` or
-whatever.
+project. Go source files are rooted under (/go/src/boiler.plate)[go/src/boiler.plate/].
+I suggest you find-and-replace references to `boiler.plate` with
+`myawesomeapp.com` or whatever.
 
-Proto services defined in `/protos` will generate interfaces under
-`/go/src/boiler.plate/services`. GRPC allows for service oriented design, even
-if you deploy as a monolithic binary. We suggest you create granular services
-such as `UserServer` defined in `user.proto` and `AuthServer` defined in
-`auth.proto`.
+The main entrypoint can be found at [go/src/boiler.plate/cmd/boiler-pate.go](go/src/boiler.plate/cmd/boiler-pate.go).
+
+Proto services defined in [protos/](protos/) will generate interfaces under
+[go/src/boiler.plate/services/](go/src/boiler.plate/services/). GRPC allows for
+service oriented design, even if you deploy as a monolithic binary. We suggest
+you create granular services such as `UserServer` defined in `user.proto` and
+`AuthServer` defined in `auth.proto`.
 
 ## Contributing
 
