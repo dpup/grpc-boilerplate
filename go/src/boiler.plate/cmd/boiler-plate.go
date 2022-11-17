@@ -61,9 +61,10 @@ func main() {
 		)),
 	)
 
+	// Add the additional services you create here.
 	greeter.RegisterGreeterServer(grpcServer, greeter.New(log))
 
-	// Create the GRPC Gateway and register with the HTTP Server.
+	// Create the GRPC Gateway and register the handlers.
 	// ===========================================================================
 	log.Info("⚙️  Configuring GRPC Gateway")
 
@@ -93,6 +94,8 @@ func main() {
 	)
 
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(clientTLSFromFile(certFile))}
+
+	// Add the additional services you create here.
 	if err := greeter.RegisterGreeterHandlerFromEndpoint(context.Background(), gateway, endpoint, opts); err != nil {
 		panic(err)
 	}
