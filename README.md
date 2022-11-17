@@ -12,8 +12,8 @@ blog posts and walkthroughs it can still take hours of Googling to get it going.
 
 This repo is intended to fast track the set up of new projects.
 
+- https://github.com/grpc/grpc-go
 - https://grpc-ecosystem.github.io/grpc-gateway/
--
 
 ## What you get
 
