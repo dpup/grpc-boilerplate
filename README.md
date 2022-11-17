@@ -38,7 +38,7 @@ Hopefully that works. Please submit Pull Requests with corrections or updates.
 ## Code layout
 
 This boilerplate is intended to work best for a multi-language, mono-repo
-project. Go source files are rooted under (/go/src/boiler.plate)[go/src/boiler.plate/].
+project. Go source files are rooted under [go/src/boiler.plate/](go/src/boiler.plate/).
 I suggest you find-and-replace references to `boiler.plate` with
 `myawesomeapp.com` or whatever.
 
