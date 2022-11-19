@@ -1,7 +1,7 @@
 # GRPC Boilerplate
 
-_Fully functional boilerplate code for running a multiplexed GRPC Server and
-GRPC Gateway (JSON/REST proxy) over HTTPS._
+_Fully functional boilerplate for running a multiplexed GRPC Server and GRPC
+Gateway (JSON/REST proxy) over HTTPS, with a Typescript web client._
 
 GRPC is a great way for building web services. Once up and running it offers a
 developer experience that is convenient and quick to build on, and with the GRPC
@@ -14,11 +14,14 @@ This repo is intended to fast track the set up of new projects.
 
 - https://github.com/grpc/grpc-go
 - https://grpc-ecosystem.github.io/grpc-gateway/
+- https://github.com/grpc/grpc-web
 
 ## What you get
 
 - A `helloworld` GRPC Server based on the [offical example](https://github.com/grpc/grpc-go/tree/master/examples/helloworld).
 - A GRPC Gateway configured to proxy the same `helloworld` service.
+- A generated Typescript client which talks to the GRPC Gateway, and mimimal
+  page that exercises the client.
 - A simple multiplexer that allows both the GRPC Gateway and the GRPC Server to
   operate on the same port.
 - TLS support for the GRPC Gateway, with self-signed local certs.
@@ -32,8 +35,12 @@ This repo is intended to fast track the set up of new projects.
 5. Follow instructions to add certs to your key chain.
 6. Run the server `make run`.
 7. Make a test request `curl 'https://localhost:5050/v1/greeting?name=dan'`.
+8. Open https://localhost:5050 in your browser, the prompt and alert will make an RPC
+9. 🎉🥂
 
-Hopefully that works. Please submit Pull Requests with corrections or updates.
+Hopefully that works.
+
+Please submit Pull Requests with corrections or updates.
 
 ## Code layout
 

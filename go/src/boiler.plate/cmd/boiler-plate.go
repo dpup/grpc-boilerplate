@@ -17,7 +17,7 @@ import (
 
 	"github.com/NYTimes/gziphandler"
 	"github.com/grpc-ecosystem/go-grpc-middleware"
-	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
+	"github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -34,6 +34,9 @@ const (
 	// Demonstrating using self-signed certs for development.
 	certFile = "gen/certs/server.crt"
 	keyFile  = "gen/certs/server.key"
+
+	// Serves an index.html which can be used for testing locally.
+	staticFiles = "gen/www/"
 )
 
 func main() {
@@ -100,13 +103,19 @@ func main() {
 		panic(err)
 	}
 
-	// Set up a server to receive HTTP traffic. Arbitrary handlers can be added
-	// here, like the robots example. They should come before the GRPC Gateway.
+	// Set up a server to receive HTTP traffic.
 	// ===========================================================================
 	log.Info("⚙️  Setting up HTTP server")
 	httpMux := http.NewServeMux()
+
+	// Arbitrary handlers can be added here. They should come before the GRPC Gateway.
 	httpMux.HandleFunc("/robots.txt", robots)
-	httpMux.Handle("/", gateway)
+
+	// The GRPC Gateway, if you change the API prefix you'll need to update this.
+	httpMux.Handle("/v1/", gateway)
+
+	// This static file server should be removed or hardened from a prod app.
+	httpMux.Handle("/", http.FileServer(http.Dir(staticFiles)))
 
 	// Chain handlers for logging and gzip.
 	httpHandler := httpLogger(log, gziphandler.GzipHandler(httpMux))

@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "noEmit": false, // REQUIRED: `"noEmit": false
+    "module": "esnext", // REQUIRED: "module": "esnext"
+    "outDir": "../../gen/www",
+    "rootDir": "./",
+    "target": "esnext"
+  }
+}

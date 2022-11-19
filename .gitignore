@@ -4,8 +4,13 @@ go/pkg
 *.pb.go
 *.gw.go
 gen/
+*.pb.ts
+
+# Yarn deps.
+node_modules
 
 # OS and IDE files.
 .DS_Store
 *.sublime-workspace
 *.orig
+
