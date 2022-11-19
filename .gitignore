@@ -3,8 +3,7 @@ go/bin
 go/pkg
 *.pb.go
 *.gw.go
-certs/server.*
-certs/rootCA.*
+gen/
 
 # OS and IDE files.
 .DS_Store

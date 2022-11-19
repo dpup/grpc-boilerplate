@@ -32,8 +32,8 @@ const (
 	port = 5050
 
 	// Demonstrating using self-signed certs for development.
-	certFile = "certs/server.crt"
-	keyFile  = "certs/server.key"
+	certFile = "gen/certs/server.crt"
+	keyFile  = "gen/certs/server.key"
 )
 
 func main() {
