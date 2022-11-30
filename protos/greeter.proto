@@ -4,10 +4,34 @@ package greeter;
 option go_package = "boiler.plate/services/greeter";
 
 import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+    info: {
+        title: "GRPC Boiler Plate";
+        version: "1.0";
+        contact: {
+            name: "dpup";
+            url: "https://github.com/dpup/grpc-boilerplate";
+        };
+        license: {
+            name: "ISC License";
+            url: "https://github.com/dpup/grpc-boilerplate/LICENSE";
+        };
+    };
+
+    schemes: HTTPS;
+    consumes: "application/json";
+    produces: "application/json";
+};
 
 service Greeter {
-  // Sends a greeting
-  rpc SayHello (HelloRequest) returns (HelloReply) {
+  // SayHello
+  //
+  // {{.MethodDescriptorProto.Name}} is a call with the method(s) {{$first := true}}{{range .Bindings}}{{if $first}}{{$first = false}}{{else}}, {{end}}{{.HTTPMethod}}{{end}} within the "{{.Service.Name}}" service.
+  // It takes in "{{.RequestType.Name}}" and returns a "{{.ResponseType.Name}}".
+  rpc SayHello (HelloRequest) returns (HelloResponse) {
     option (google.api.http) = {
       get: "/v1/greeting"
     };
@@ -16,10 +40,12 @@ service Greeter {
 
 // The request message containing the user's name.
 message HelloRequest {
-  string name = 1;
+  // Name of the person to be greeted.
+  string name = 1 [(google.api.field_behavior) = REQUIRED];
 }
 
-// The response message containing the greetings
-message HelloReply {
+// The response message containing the greeting.
+message HelloResponse {
+  // The greeting message itself.
   string message = 1;
 }

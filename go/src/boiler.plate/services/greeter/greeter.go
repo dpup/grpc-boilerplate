@@ -16,7 +16,7 @@ type server struct {
 	log grpclog.LoggerV2
 }
 
-func (s *server) SayHello(ctx context.Context, in *HelloRequest) (*HelloReply, error) {
+func (s *server) SayHello(ctx context.Context, in *HelloRequest) (*HelloResponse, error) {
 	s.log.Infof("📧 Greeting request for %s", in.GetName())
-	return &HelloReply{Message: "Hello " + in.GetName()}, nil
+	return &HelloResponse{Message: "Hello " + in.GetName()}, nil
 }

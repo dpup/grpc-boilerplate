@@ -14,7 +14,7 @@ This repo is intended to fast track the set up of new projects.
 
 - https://github.com/grpc/grpc-go
 - https://grpc-ecosystem.github.io/grpc-gateway/
-- https://github.com/grpc/grpc-web
+- https://grpc-ecosystem.github.io/grpc-gateway/docs/mapping/customizing_openapi_output/
 
 ## What you get
 
@@ -38,7 +38,7 @@ This repo is intended to fast track the set up of new projects.
 8. Open https://localhost:5050 in your browser, the prompt and alert will make an RPC
 9. 🎉🥂
 
-Hopefully that works.
+Hopefully that works. Run `make help` to see information about other commands.
 
 Please submit Pull Requests with corrections or updates.
 

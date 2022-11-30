@@ -19,6 +19,7 @@ CERT_SRC := $(ROOT_DIR)/certs
 GEN_OUT := $(ROOT_DIR)/gen
 
 run: build-backend build-static
+	@echo "🚀 Running server on port 5050"
 	@$(GO_BIN)/boiler-plate
 
 build-backend: gen-proto
@@ -45,6 +46,10 @@ gen-proto:
 		--grpc-gateway-ts_out=ts_import_roots=$(TYPESCRIPT_SRC),ts_import_root_aliases=base:$(TYPESCRIPT_SERVICES) \
     --openapiv2_out $(GEN_OUT)/openapiv2 \
     --openapiv2_opt logtostderr=true \
+    --openapiv2_opt use_go_templates=true \
+    --openapiv2_opt simple_operation_ids=true \
+    --openapiv2_opt openapi_naming_strategy=fqn \
+    --openapiv2_opt disable_default_errors=true \
 		$(shell find $(PROTO_SRC) -name "*.proto")
 	@echo "👷🏽‍♀️ Proto definitions generated"
 
@@ -87,6 +92,13 @@ clean:
 	@find $(TYPESCRIPT_SERVICES) | grep .pb.ts | xargs rm
 	@echo "🧹 Generated files removed"
 
+run-docs: gen-proto
+	@echo "📝 Running Swagger server on port 5051"
+	@docker run -p 5051:8080 \
+    -e SWAGGER_JSON=/openapiv2/greeter.swagger.json \
+    -v $(PWD)/gen/openapiv2/:/openapiv2 \
+    swaggerapi/swagger-ui
+
 env:
 	go env
 
@@ -98,7 +110,8 @@ help:
 	@echo "  make install-deps - Installs necessary commands in go/bin/"
 	@echo "  make gen-certs    - Generates self-signed certs for dev"
 	@echo "  make build        - Build the Go binary"
-	@echo "  make run          - Runs the sample GRPC server"
+	@echo "  make run          - Runs the sample GRPC server on port 5050"
+	@echo "  make run-docs     - Uses docker to render Swagger API docs on port 5051"
 	@echo "  make gen-proto    - Generate GRPC definitions from protos"
 	@echo "  make tidy         - Updates go.mod following any changes"
 	@echo "  make clean        - Removes generated files (except certs)"
