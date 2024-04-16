@@ -15,8 +15,8 @@ PROTO_SRC := $(ROOT_DIR)/protos
 TYPESCRIPT_SRC := $(ROOT_DIR)/ts/src
 TYPESCRIPT_PUB := $(ROOT_DIR)/ts/public
 TYPESCRIPT_SERVICES := $(ROOT_DIR)/ts/src/services
-CERT_SRC := $(ROOT_DIR)/certs
 GEN_OUT := $(ROOT_DIR)/gen
+CERT_SRC := $(GEN_OUT)/certs
 
 run: build-backend build-static
 	@echo "🚀 Running server on port 5050"
@@ -37,6 +37,7 @@ build-static: gen-proto
 
 gen-proto:
 	@mkdir -p $(GEN_OUT)/openapiv2
+	@mkdir -p $(TYPESCRIPT_SERVICES)
 	@cd $(PROTO_SRC) && protoc -I$(PROTO_SRC) -I$(GO_SRC) \
 		--go_out=$(GO_SRC) \
 		--grpc_out=$(GO_SRC) \

@@ -8,21 +8,24 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 
 	"boiler.plate/services/greeter"
 
 	"github.com/NYTimes/gziphandler"
-	"github.com/grpc-ecosystem/go-grpc-middleware"
-	"github.com/grpc-ecosystem/go-grpc-middleware/recovery"
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/utilities"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/grpclog"
 	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
 )
 
 const (
@@ -86,9 +89,8 @@ func main() {
 		// Set up error handling for logging, analytics, or custom error responses.
 		runtime.WithErrorHandler(errorHandler(log)),
 
-		// The GRPC Gateway can be set up to handle form encoded data too, but you
-		// need to register your own marshaler.
-		// runtime.WithMarshalerOption("application/x-www-form-urlencoded", &FormMarshaler{}),
+		// Set up the GRPC Gateway to handle form encoded data.
+		runtime.WithMarshalerOption("application/x-www-form-urlencoded", &formDecoder{}),
 
 		// You'll likely find you want to do some custom mapping of HTTP to GRPC
 		// headers, if so override these two methods.
@@ -161,7 +163,7 @@ func robots(w http.ResponseWriter, req *http.Request) {
 	w.Write([]byte("User-agent: *\nDisallow: /\n"))
 }
 
-// Creates credentials from a cert and key file, while using a restricted ciphers.
+// Creates credentials from a cert and key file, while using restricted ciphers.
 // See https://github.com/grpc/grpc-go/blob/7aea499f9110a479b3777df064372f44188146aa/credentials/credentials.go#L212
 func serverTLSFromFile(cert, key string) credentials.TransportCredentials {
 	c, err := tls.LoadX509KeyPair(cert, key)
@@ -175,7 +177,7 @@ func serverTLSFromFile(cert, key string) credentials.TransportCredentials {
 
 // See https://github.com/grpc/grpc-go/blob/7aea499f9110a479b3777df064372f44188146aa/credentials/credentials.go#L195
 func clientTLSFromFile(cert string) credentials.TransportCredentials {
-	b, err := ioutil.ReadFile(cert)
+	b, err := os.ReadFile(cert)
 	if err != nil {
 		panic(err)
 	}
@@ -188,42 +190,29 @@ func clientTLSFromFile(cert string) credentials.TransportCredentials {
 	return credentials.NewTLS(tlsConfig)
 }
 
-// safeTLSConfig returns a TLS config with insecure ciphers excluded.
+// safeTLSConfig returns a restrictive TLS config intended to be safe for HIPAA
+// and other sensitive data. You may need to adjust this for your own needs.
 func safeTLSConfig() *tls.Config {
 	return &tls.Config{
-		NextProtos:               []string{"h2"},
+		NextProtos: []string{"h2"},
+		MinVersion: tls.VersionTLS12,
+		MaxVersion: tls.VersionTLS13,
+		CipherSuites: []uint16{
+			tls.TLS_AES_128_GCM_SHA256,
+			tls.TLS_AES_256_GCM_SHA384,
+			tls.TLS_CHACHA20_POLY1305_SHA256,
+			tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+			tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+			tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+		},
 		PreferServerCipherSuites: true,
-		CipherSuites:             safeCipherSuites,
-		MinVersion:               tls.VersionTLS12,
-		MaxVersion:               tls.VersionTLS12,
+		CurvePreferences: []tls.CurveID{
+			tls.X25519,
+			tls.CurveP256,
+		},
+		SessionTicketsDisabled: true,
 	}
-}
-
-// Secure Go implementations of modern TLS ciphers
-//
-// See https://stackoverflow.com/questions/21562269/golang-how-to-specify-certificate-in-tls-config-for-http-client
-//
-// The following ciphers are excluded because:
-//  - RC4 ciphers:              RC4 is broken
-//  - 3DES ciphers:             Because of the 64 bit blocksize of DES (Sweet32)
-//  - CBC-SHA256 ciphers:       No countermeasures against Lucky13 timing attack
-//  - CBC-SHA ciphers:          Legacy ciphers (SHA-1) and non-constant time
-//                              implementation of CBC.
-//                              (CBC-SHA ciphers can be enabled again if required)
-//  - RSA key exchange ciphers: Disabled because of dangerous PKCS1-v1.5 RSA
-//                              padding scheme. See Bleichenbacher attacks.
-var safeCipherSuites = []uint16{
-	tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,
-	tls.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,
-	tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-	tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-	tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-	tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-
-	// tls.TLS_RSA_WITH_AES_128_GCM_SHA256,
-	// tls.TLS_RSA_WITH_AES_256_GCM_SHA384,
-	// tls.TLS_RSA_WITH_AES_128_CBC_SHA,
-	// tls.TLS_RSA_WITH_AES_256_CBC_SHA,
 }
 
 func multiplex(grpcServer *grpc.Server, otherHandler http.Handler) http.Handler {
@@ -233,5 +222,49 @@ func multiplex(grpcServer *grpc.Server, otherHandler http.Handler) http.Handler 
 		} else {
 			otherHandler.ServeHTTP(w, r)
 		}
+	})
+}
+
+// Forked from pending issue here:
+// https://github.com/grpc-ecosystem/grpc-gateway/issues/7
+type formDecoder struct {
+	runtime.Marshaler
+}
+
+// ContentType means the content type of the response
+func (u formDecoder) ContentType(_ interface{}) string {
+	return "application/json"
+}
+
+func (u formDecoder) Marshal(v interface{}) ([]byte, error) {
+	// can marshal the response in proto message format
+	j := runtime.JSONPb{}
+	return j.Marshal(v)
+}
+
+// NewDecoder indicates how to decode the request
+func (u formDecoder) NewDecoder(r io.Reader) runtime.Decoder {
+	return runtime.DecoderFunc(func(p interface{}) error {
+		msg, ok := p.(proto.Message)
+		if !ok {
+			return fmt.Errorf("not proto message")
+		}
+
+		formData, err := io.ReadAll(r)
+		if err != nil {
+			return err
+		}
+
+		values, err := url.ParseQuery(string(formData))
+		if err != nil {
+			return err
+		}
+
+		filter := &utilities.DoubleArray{}
+		err = runtime.PopulateQueryParameters(msg, values, filter)
+		if err != nil {
+			return err
+		}
+		return nil
 	})
 }
