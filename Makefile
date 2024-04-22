@@ -73,7 +73,7 @@ install-deps:
 	@cd $(GO_MOD_ROOT) && go install \
 		github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway \
 		github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2 \
-		github.com/grpc-ecosystem/protoc-gen-grpc-gateway-ts \
+		github.com/dpup/protoc-gen-grpc-gateway-ts \
 		google.golang.org/protobuf/cmd/protoc-gen-go \
 		google.golang.org/grpc/cmd/protoc-gen-go-grpc
 	@# Hack to avoid "protoc-gen-grpc: program not found or is not executable" error

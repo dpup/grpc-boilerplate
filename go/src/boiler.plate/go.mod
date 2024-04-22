@@ -4,9 +4,9 @@ go 1.21
 
 require (
 	github.com/NYTimes/gziphandler v1.1.1
+	github.com/dpup/protoc-gen-grpc-gateway-ts v0.0.0-20240419191750-38d65664924d
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.19.1
-	github.com/grpc-ecosystem/protoc-gen-grpc-gateway-ts v1.1.2
 	google.golang.org/genproto/googleapis/api v0.0.0-20240415180920-8c6c420018be
 	google.golang.org/grpc v1.63.2
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.2.0
