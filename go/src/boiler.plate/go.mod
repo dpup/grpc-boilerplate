@@ -5,8 +5,9 @@ go 1.21
 require (
 	github.com/NYTimes/gziphandler v1.1.1
 	github.com/dpup/protoc-gen-grpc-gateway-ts v0.0.0-20240419191750-38d65664924d
-	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
+	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.1.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.19.1
+	golang.org/x/net v0.24.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20240415180920-8c6c420018be
 	google.golang.org/grpc v1.63.2
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.2.0
@@ -29,7 +30,6 @@ require (
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	github.com/sirupsen/logrus v1.7.0 // indirect
 	golang.org/x/crypto v0.22.0 // indirect
-	golang.org/x/net v0.24.0 // indirect
 	golang.org/x/sys v0.19.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240415180920-8c6c420018be // indirect

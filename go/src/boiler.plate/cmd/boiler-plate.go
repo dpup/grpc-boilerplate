@@ -17,10 +17,11 @@ import (
 	"boiler.plate/services/greeter"
 
 	"github.com/NYTimes/gziphandler"
-	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
-	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/utilities"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/grpclog"
@@ -61,10 +62,10 @@ func main() {
 
 		// Sample middleware. Write your own interceptors or find useful pre-built
 		// ones here: https://github.com/grpc-ecosystem/go-grpc-middleware
-		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
+		grpc.ChainUnaryInterceptor(
 			grpcLogger(log),
-			grpc_recovery.UnaryServerInterceptor(),
-		)),
+			recovery.UnaryServerInterceptor(),
+		),
 	)
 
 	// Add the additional services you create here.
@@ -216,13 +217,13 @@ func safeTLSConfig() *tls.Config {
 }
 
 func multiplex(grpcServer *grpc.Server, otherHandler http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	return h2c.NewHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.ProtoMajor == 2 && strings.Contains(r.Header.Get("Content-Type"), "application/grpc") {
 			grpcServer.ServeHTTP(w, r)
 		} else {
 			otherHandler.ServeHTTP(w, r)
 		}
-	})
+	}), &http2.Server{})
 }
 
 // Forked from pending issue here:
